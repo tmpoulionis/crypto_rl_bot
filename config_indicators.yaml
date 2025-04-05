@@ -17,11 +17,18 @@ indicators:
       length: 14
 
   1d: # Daily indicators
-    ema_200: # Exponential Moving Average
-      kind: "ema" 
-      length: 200
-    ema_50:
-      kind: "ema"
-      length: 50
-
+    adx: # Average Directional Index
+      length: 14 
+    atr: # Average True Range
+      length: 14
+    bbands: # Bollinger Bands
+      length: 20
+      stddev: 2.0
+    macd: # Moving Average Convergence Divergence
+      fast: 12
+      slow: 26
+      signal: 9
+    rsi: # Relative Strength Index
+      length: 14
+  
 

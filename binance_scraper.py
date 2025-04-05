@@ -37,14 +37,16 @@ def calculate_indicators(df, interval, indicator_config):
 
 def fetch_data(client, coin, interval, start_time, end_time):
     
-    klines = client.get_historical_klines(symbol=coin, interval=interval, start_str=start_time, end_str=end_time) # Fetch the data using Binance's API
+    klines_futures = client.futures_historical_klines(symbol=coin, interval=interval, start_str=start_time, end_str=end_time, limit=None) # Fetch the data using Binance's API
     
     # Convert the data to a DataFrame and process it
-    df = pd.DataFrame(klines, columns=['open_time', 'open', 'high', 'low', 'close', 'volume', 'close Time', 'quote asset volume', 'number of trades', 'taker buy base asset volume', 'taker buy quote asset volume', 'ignore'])
+    df = pd.DataFrame(klines_futures, columns=['open_time','open', 'high', 'low', 'close', 'volume', 'close_time', 'qav','num_trades','taker_base_vol', 'taker_quote_vol', 'ignore'])
+    df = df[['open_time','open', 'high', 'low', 'close', 'volume']].astype(np.float32) # .astype(np.float64) is a must
+    
+    df = df.fillna(method='ffill')
+    
     df['open_time'] = pd.to_datetime(df['open_time'], unit='ms')
-    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(np.float64)
-    df = df.drop(columns=['close Time', 'quote asset volume', 'number of trades', 'taker buy base asset volume', 'taker buy quote asset volume', 'ignore'])
-    df.set_index('open_time', inplace=True)
+    df = df.set_index("open_time")
     return df
 
 def main():
