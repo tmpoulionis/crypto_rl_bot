@@ -2,6 +2,11 @@ import ray
 from ray import tune
 from config import ppo_config # for One-way strategy
 # from config_long import ppo_config # for Long only strategy
+import os 
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "envs"))
 
 ray.shutdown()
 ray.init()

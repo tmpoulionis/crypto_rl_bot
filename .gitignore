@@ -1,5 +1,7 @@
 # gitignore
 .env
 __pycache__
-dataset.csv
+dataset.npy
 data
+scrap
+advanced_transformer.py

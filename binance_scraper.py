@@ -41,11 +41,11 @@ def fetch_data(client, coin, interval, start_time, end_time):
     
     # Convert the data to a DataFrame and process it
     df = pd.DataFrame(klines_futures, columns=['open_time','open', 'high', 'low', 'close', 'volume', 'close_time', 'qav','num_trades','taker_base_vol', 'taker_quote_vol', 'ignore'])
-    df = df[['open_time','open', 'high', 'low', 'close', 'volume']].astype(np.float32) # .astype(np.float64) is a must
+    df = df[['open_time','open', 'high', 'low', 'close', 'volume']].astype(np.float64) # .astype(np.float64) is a must
     
     df = df.fillna(method='ffill')
     
-    df['open_time'] = pd.to_datetime(df['open_time'], unit='ms')
+    df['open_time'] = pd.to_datetime(df['open_time'], unit='ms') # Convert the open_time to datetime format
     df = df.set_index("open_time")
     return df
 
