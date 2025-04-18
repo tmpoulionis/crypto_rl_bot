@@ -22,5 +22,5 @@ tune.run(
     verbose=2,
     reuse_actors=False,
     # resume=True,
-    # restore="./results/PPO/PPO_CryptoEnv_1a171_00000_0_2024-05-02_11-51-01/checkpoint_000012"
+    # restore="C:/Users/tmpou/ray_results/PPO_2025-04-16_17-59-27/PPO_CryptoEnv_64a14_00000_0_2025-04-16_17-59-27/checkpoint_000007"
 )

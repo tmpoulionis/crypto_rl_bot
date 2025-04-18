@@ -55,18 +55,21 @@ ppo_config = (
         action_space=gym.spaces.Discrete(4),
     )
     .training(
-        lr=5e-5,
+        lr_schedule=[
+            [0, 1e-4],     
+            [2e6, 5e-5],  
+            [4e6, 1e-5]],
         gamma=0.995, # 1.
         grad_clip=30.,
-        entropy_coeff=0.03,
-        kl_coeff=0.05,
+        entropy_coeff=0.05,
+        kl_coeff=0,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
         use_gae=True,
         # lambda=0.95,
-        clip_param=0.3, # larger values for more policy change
+        clip_param=0.2, # larger values for more policy change
         vf_clip_param=10,
-        train_batch_size=1 * 1 * 168, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length
+        train_batch_size=8 * 6 * 168, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length
         shuffle_sequences=True,
         model={
             "custom_model": "SimpleTransformer",
@@ -75,7 +78,7 @@ ppo_config = (
                 "nhead": 4, 
                 "nlayers": 3,
                 "seq_len": 168,
-                "dropout": 0.1,
+                "dropout": 0.3,
             }
         }
     )
@@ -96,8 +99,8 @@ ppo_config = (
         evaluation_num_workers=4
     )
     .rollouts(
-        num_rollout_workers=1,
-        num_envs_per_worker=1,
+        num_rollout_workers=6,
+        num_envs_per_worker=4,
         rollout_fragment_length=168,
         batch_mode='complete_episodes',
         preprocessor_pref=None
@@ -106,6 +109,6 @@ ppo_config = (
         num_gpus=1
     )
     .debugging(
-        log_level='DEBUG'
+        log_level='WARN'
     )
 )
