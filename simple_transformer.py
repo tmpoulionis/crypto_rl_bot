@@ -68,7 +68,7 @@ class SimpleTransformer(TorchModelV2, nn.Module):
             nn.Linear(256, 64),
             nn.LayerNorm(64),
             nn.GELU(),
-            nn.Linear(64, num_outputs)
+            nn.Linear(64, 1)
         )
 
     @override(ModelV2)
