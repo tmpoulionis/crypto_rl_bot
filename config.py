@@ -55,15 +55,12 @@ ppo_config = (
         action_space=gym.spaces.Discrete(4),
     )
     .training(
-        lr_schedule=[
-            [0, 1e-4],     
-            [2e6, 5e-5],  
-            [4e6, 1e-5]],
+        lr=1e-5,
         gamma=0.995, # 1.
         grad_clip=30.,
-        entropy_coeff=0.05,
+        entropy_coeff=0.03,
         kl_coeff=0,
-        kl_target=0.01, # not used if kl_coeff == 0.
+        kl_target=0, # not used if kl_coeff == 0.
         num_sgd_iter=10,
         use_gae=True,
         # lambda=0.95,
@@ -78,7 +75,7 @@ ppo_config = (
                 "nhead": 4, 
                 "nlayers": 3,
                 "seq_len": 168,
-                "dropout": 0.3,
+                "dropout": 0.2,
             }
         }
     )

@@ -18,7 +18,7 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         self.nheads = custom_config["nhead"]
         self.nlayers = custom_config["nlayers"]
         self.dropout = custom_config["dropout"]
-        self.values_out = None
+        self.values_out = None  
         self.device = None
 
         # Input layer
@@ -39,21 +39,29 @@ class SimpleTransformer(TorchModelV2, nn.Module):
             num_layers=self.nlayers
         )
         
-        # Policy and value heads
+        # Policy and value networks
         self.policy_head = nn.Sequential(
             nn.Linear(self.embed_size + 2, 256), # Add dynamic features (wallet balance, unrealized PnL)
             nn.LayerNorm(256),
-            nn.Dropout(0.2),
+            nn.Dropout(0.1),
             nn.GELU(),
-            nn.Linear(256, num_outputs) # Action space size
+            nn.Linear(256, 64),
+            nn.LayerNorm(64),
+            nn.Dropout(0.1),
+            nn.GELU(),
+            nn.Linear(64, num_outputs) # Action space size
         )
 
         self.value_head = nn.Sequential(
             nn.Linear(self.embed_size + 2, 256),
             nn.LayerNorm(256),
-            nn.Dropout(0.2),
+            nn.Dropout(0.1),
             nn.GELU(),
-            nn.Linear(256, 1)
+            nn.Linear(256, 64),
+            nn.LayerNorm(64),
+            nn.Dropout(0.1),
+            nn.GELU(),
+            nn.Linear(64, 1)
         )
 
     @override(ModelV2)
