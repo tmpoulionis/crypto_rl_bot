@@ -41,7 +41,11 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         
         # Policy and value networks
         self.policy_head = nn.Sequential(
-            nn.Linear(self.embed_size + 2, 256), # Add dynamic features (wallet balance, unrealized PnL)
+            nn.Linear(self.embed_size + 2, 512),  # Add dynamic features (wallet balance, unrealized PnL)
+            nn.LayerNorm(512),
+            nn.GELU(),
+            nn.Dropout(0.2),  # Dropout after activation
+            nn.Linear(512, 256),
             nn.LayerNorm(256),
             nn.Dropout(0.1),
             nn.GELU(),
@@ -53,15 +57,18 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         )
 
         self.value_head = nn.Sequential(
-            nn.Linear(self.embed_size + 2, 256),
-            nn.LayerNorm(256),
-            nn.Dropout(0.1),
+            nn.Linear(self.embed_size + 2, 512),
+            nn.LayerNorm(512),
             nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
+            nn.LayerNorm(256),
+            nn.GELU(),
+            nn.Dropout(0.1),
             nn.Linear(256, 64),
             nn.LayerNorm(64),
-            nn.Dropout(0.1),
             nn.GELU(),
-            nn.Linear(64, 1)
+            nn.Linear(64, num_outputs)
         )
 
     @override(ModelV2)
