@@ -5,3 +5,4 @@ dataset.npy
 data
 scrap
 advanced_transformer.py
+.DS_Store
