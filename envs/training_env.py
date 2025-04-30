@@ -32,6 +32,7 @@ class LearningCryptoEnv(gym.Env):
         initial_random_allocated: float = 0,
         regime: str = 'training',
         record_stats: bool = False,
+        reward_coeff = 0.5
         # cold_start_steps: int = 0
     ):
         self.scaler = Scaler(min_quantile = 0.5, max_quantile = 99.5, scale_coef = initial_capital)
@@ -297,6 +298,7 @@ class LearningCryptoEnv(gym.Env):
         # normalize rewards to fit [-10:10] range
         reward = (self.reward_realized_pnl_short + self.reward_realized_pnl_long) / self.initial_balance
         # reward = (next_equity - self.equity) / self.initial_balance # reward function for equity changes
+        # reward = ((1-self.reward_coeff)*(self.reward_realized_pnl_long + self.reward_realized_pnl_short) + coeff * (next_equity - self.equity)) / self.initial_balance # reward function: realized PnL + coeff * Equity
 
         self.equity = next_equity
 

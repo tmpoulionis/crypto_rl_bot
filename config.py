@@ -36,7 +36,7 @@ ppo_config = (
             "train_end": [7000, 13000, 19000, 25000, 31000, 37000, 43000], 
             "test_start": [7000, 13000, 19000, 25000, 31000, 37000, 43000],
             "test_end": [8000, 14000, 20000, 26000, 32000, 38000, 44424-1], 
-            "order_size": 50, # dollars
+            "order_size": 100, # dollars
             "initial_capital": 1000, # dollars
             "open_fee": 0.12e-2, # taker_fee
             "close_fee": 0.12e-2, # taker_fee
@@ -65,16 +65,16 @@ ppo_config = (
         entropy_coeff=0.05,
         entropy_schedule = [
             [0, 0.05],
-            [15e-6, 0.005]
+            [15e-6, 0.01]
         ],
-        kl_coeff=0.2,
-        kl_target=0.02, # not used if kl_coeff == 0.
+        kl_coeff=0.1,
+        kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
         use_gae=True,
         # lambda=0.95,
         clip_param=0.2, # larger values for more policy change
         vf_clip_param=5,
-        train_batch_size=8 * 6 * 168 * 4, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length * multiplier
+        train_batch_size=8 * 6 * 168, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length * multiplier
         shuffle_sequences=True,
         model={
             "custom_model": "SimpleTransformer",
@@ -83,7 +83,7 @@ ppo_config = (
                 "nhead": 4, 
                 "nlayers": 3,
                 "seq_len": 168,
-                "dropout": 0.1,
+                "dropout": 0.2,
             }
         }
     )
