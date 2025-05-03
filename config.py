@@ -61,7 +61,7 @@ ppo_config = (
         entropy_coeff=0.05,
         entropy_coeff_schedule = [
             [0, 0.05],
-            [5e-6, 0.005]
+            [5e6, 0.005]
         ],
         kl_coeff=0.1,
         kl_target=0.01, # not used if kl_coeff == 0.
