@@ -20,8 +20,25 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         self.dropout = custom_config["dropout"]
         self.values_out = None  
         self.device = None
+        self.cnn_enabled = custom_config["cnn_enabled"]
+        self.freeze_cnn = custom_config["freeze_cnn"]
 
-        # Input layer
+        # -------------- CNN Front-end --------------------
+        if self.cnn_enabled:
+            self.cnn = nn.Sequential(
+                nn.Conv1D(self.input_dim, 64, kernel_size=3, padding=1),
+                nn.GELU(),
+                nn.Conv1D(64, 64, kernel_size=3, padding=1),
+                nn.GELU(),
+                nn.Conv1D(64, self.embed_size, kernel_size=1, padding=1)
+            )
+            if self.freeze_cnn:
+                for p in self.cnn.parameters():
+                    p.requires_grad = False
+        else:
+            self.cnn = None 
+                   
+        # -------------- Input layer -----------------------
         self.input_embed = nn.Linear(self.input_dim, self.embed_size)
         
         # Positional encoding
@@ -39,7 +56,7 @@ class SimpleTransformer(TorchModelV2, nn.Module):
             num_layers=self.nlayers
         )
         
-        # Policy and value networks
+        # ---------- Policy and value networks ------------------
         self.policy_head = nn.Sequential(
             nn.Linear(self.embed_size + 2, 512),  # Add dynamic features (wallet balance, unrealized PnL)
             nn.LayerNorm(512),
