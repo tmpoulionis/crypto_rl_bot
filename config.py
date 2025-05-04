@@ -55,21 +55,17 @@ ppo_config = (
         action_space=gym.spaces.Discrete(4),
     )
     .training(
-        lr=1e-5,
+        lr=5e-5,
         gamma=0.995, # 1.
         grad_clip=30,
-        entropy_coeff=0.05,
-        entropy_coeff_schedule = [
-            [0, 0.05],
-            [5e6, 0.005]
-        ],
-        kl_coeff=0.1,
+        entropy_coeff=0.03,
+        kl_coeff=0.05,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
         use_gae=True,
         # lambda=0.95,
         clip_param=0.2, # larger values for more policy change
-        vf_clip_param=5,
+        vf_clip_param=10,
         train_batch_size=8 * 6 * 168, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length * multiplier
         shuffle_sequences=True,
         model={
