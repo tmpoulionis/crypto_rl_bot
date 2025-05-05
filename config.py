@@ -75,7 +75,7 @@ ppo_config = (
                 "nhead": 4,
                 "nlayers": 3,
                 "seq_len": 168,
-                "dropout": 0.2,
+                "dropout": 0.1,
                 "cnn_enabled": False,
                 "freeze_cnn": False,
             }
