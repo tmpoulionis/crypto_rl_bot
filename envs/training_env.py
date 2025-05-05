@@ -296,9 +296,9 @@ class LearningCryptoEnv(gym.Env):
 
         # reward function
         # normalize rewards to fit [-10:10] range
-        reward = (self.reward_realized_pnl_short + self.reward_realized_pnl_long) / self.initial_balance
+        # reward = (self.reward_realized_pnl_short + self.reward_realized_pnl_long) / self.initial_balance
         # reward = (next_equity - self.equity) / self.initial_balance # reward function for equity changes
-        # reward = ((1-self.reward_coeff)*(self.reward_realized_pnl_long + self.reward_realized_pnl_short) + coeff * (next_equity - self.equity)) / self.initial_balance # reward function: realized PnL + coeff * Equity
+        reward = ((1-self.reward_coeff)*(self.reward_realized_pnl_long + self.reward_realized_pnl_short) + self.reward.coeff * (next_equity - self.equity)) / self.initial_balance # reward function: realized PnL + coeff * Equity
 
         self.equity = next_equity
 

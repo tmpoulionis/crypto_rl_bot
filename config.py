@@ -55,24 +55,24 @@ ppo_config = (
         action_space=gym.spaces.Discrete(4),
     )
     .training(
-        lr=5e-5,
+        lr=3e-4,
         gamma=0.995, # 1.
         grad_clip=30,
-        entropy_coeff=0.03,
+        entropy_coeff=0.01,
         kl_coeff=0.05,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
         use_gae=True,
         # lambda=0.95,
         clip_param=0.2, # larger values for more policy change
-        vf_clip_param=10,
+        vf_clip_param=5,
         train_batch_size=8 * 6 * 168, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length * multiplier
         shuffle_sequences=True,
         model={
             "custom_model": "SimpleTransformer",
             "custom_model_config": {
                 "embed_size": 128,
-                "nhead": 4, 
+                "nhead": 4,
                 "nlayers": 3,
                 "seq_len": 168,
                 "dropout": 0.2,
