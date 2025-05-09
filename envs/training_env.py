@@ -67,6 +67,7 @@ class LearningCryptoEnv(gym.Env):
 
         self.reward_realized_pnl_short = 0.
         self.reward_realized_pnl_long = 0.
+        self.reward_coeff = reward_coeff
 
         self.liquidation = False
         self.episode_maxstep_achieved = False
@@ -298,8 +299,12 @@ class LearningCryptoEnv(gym.Env):
         # normalize rewards to fit [-10:10] range
         # reward = (self.reward_realized_pnl_short + self.reward_realized_pnl_long) / self.initial_balance
         # reward = (next_equity - self.equity) / self.initial_balance # reward function for equity changes
-        reward = ((1-self.reward_coeff)*(self.reward_realized_pnl_long + self.reward_realized_pnl_short) + self.reward.coeff * (next_equity - self.equity)) / self.initial_balance # reward function: realized PnL + coeff * Equity
-
+        # --- reward function: realized PnL & equity ---
+        realized        = self.reward_realized_pnl_long + self.reward_realized_pnl_short
+        equity_delta    = next_equity - self.equity
+        unrealised_delta = equity_delta - realized     # remove realised part
+        reward = ((1 - self.reward_coeff) * realized + self.reward_coeff * unrealised_delta) / self.initial_balance
+        
         self.equity = next_equity
 
         margin_short_end = self.margin_short
