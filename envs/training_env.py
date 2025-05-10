@@ -220,72 +220,90 @@ class LearningCryptoEnv(gym.Env):
 
         self.reward_realized_pnl_short = 0.
         self.reward_realized_pnl_long = 0.
+        # ----------------------- 4 actions -----------------------
+        # # Oneway actions
+        # if action == 0:  # do nothing
+        #     self.reward_realized_pnl_long = 0.
+        #     self.reward_realized_pnl_short = 0.
 
-        # Oneway actions
-        if action == 0:  # do nothing
+        # # similar to "BUY" button
+        # if action == 1: # open/increace long position by self.order_size
+        #     if self.coins_long >= 0:
+        #         if self.available_balance > self.order_size:
+        #             buy_num_coins = self.order_size / self.price_ask
+        #             self.average_price_long = (self.position_value_long + buy_num_coins * self.price_ask) / (self.coins_long + buy_num_coins)
+        #             self.initial_margin_long += buy_num_coins * self.price_ask / self.leverage
+        #             self.coins_long += buy_num_coins
+
+        #     if -self.coins_short > 0: # close/decreace short position by self.order_size
+        #         buy_num_coins = min(-self.coins_short, self.order_size / self.price_ask)
+        #         self.initial_margin_short *= min((-self.coins_short - buy_num_coins), 0.) / -self.coins_short
+        #         self.coins_short = min(self.coins_short + buy_num_coins, 0) # cannot be positive
+        #         realized_pnl = buy_num_coins * (self.average_price_short - self.price_ask)  # buy_num_coins is positive
+        #         self.wallet_balance += realized_pnl
+        #         self.reward_realized_pnl_short = realized_pnl
+
+        # # similar to "SELL" button
+        # if action == 2: # close/reduce long position by self.order_size
+        #     if self.coins_long > 0:
+        #         sell_num_coins = min(self.coins_long, self.order_size / self.price_ask)
+        #         self.initial_margin_long *= (max((self.coins_long - sell_num_coins), 0.) / self.coins_long)
+        #         self.coins_long = max(self.coins_long - sell_num_coins, 0) # cannot be negative
+        #         realized_pnl = sell_num_coins * (self.price_bid - self.average_price_long)
+        #         self.wallet_balance += realized_pnl
+        #         self.reward_realized_pnl_long = realized_pnl
+
+        #     if -self.coins_short >= 0: # open/increase short position by self.order_size
+        #         if (self.available_balance > self.order_size):
+        #             sell_num_coins = self.order_size / self.price_ask
+        #             self.average_price_short = (self.position_value_short + sell_num_coins * self.price_bid) / (-self.coins_short + sell_num_coins)
+        #             self.initial_margin_short += sell_num_coins * self.price_ask / self.leverage
+        #             self.coins_short -= sell_num_coins
+
+        # self.liquidation = -self.unrealized_pnl_long - self.unrealized_pnl_short > self.margin_long + self.margin_short
+        # self.episode_maxstep_achieved = self.time_relative == self.max_step
+
+        # # CLOSE entire position or LIQUIDATION
+        # if action == 3 or self.liquidation or self.episode_maxstep_achieved:
+        #     # close LONG position
+        #     if self.coins_long > 0:
+        #         sell_num_coins = self.coins_long   
+        #         # becomes zero
+        #         self.initial_margin_long *= max((self.coins_long - sell_num_coins), 0.) / self.coins_long 
+        #         # becomes zero
+        #         self.coins_long = max(self.coins_long - sell_num_coins, 0)
+        #         realized_pnl = sell_num_coins * (self.price_bid - self.average_price_long)
+        #         self.wallet_balance += realized_pnl
+        #         self.reward_realized_pnl_long = realized_pnl
+
+        #     # close SHORT position
+        #     if -self.coins_short > 0:
+        #         buy_num_coins = -self.coins_short
+        #         # becomes zero
+        #         self.initial_margin_short *= min((self.coins_short + buy_num_coins), 0.) / self.coins_short
+        #         # becomes zero
+        #         self.coins_short += buy_num_coins
+        #         realized_pnl = buy_num_coins * (self.average_price_short - self.price_ask) # buy_num_coins is positive
+        #         self.wallet_balance += realized_pnl
+        #         self.reward_realized_pnl_short = realized_pnl
+        
+        if action == 0: # HOLD
             self.reward_realized_pnl_long = 0.
             self.reward_realized_pnl_short = 0.
-
-        # similar to "BUY" button
-        if action == 1: # open/increace long position by self.order_size
-            if self.coins_long >= 0:
-                if self.available_balance > self.order_size:
-                    buy_num_coins = self.order_size / self.price_ask
-                    self.average_price_long = (self.position_value_long + buy_num_coins * self.price_ask) / (self.coins_long + buy_num_coins)
-                    self.initial_margin_long += buy_num_coins * self.price_ask / self.leverage
-                    self.coins_long += buy_num_coins
-
-            if -self.coins_short > 0: # close/decreace short position by self.order_size
-                buy_num_coins = min(-self.coins_short, self.order_size / self.price_ask)
-                self.initial_margin_short *= min((-self.coins_short - buy_num_coins), 0.) / -self.coins_short
-                self.coins_short = min(self.coins_short + buy_num_coins, 0) # cannot be positive
-                realized_pnl = buy_num_coins * (self.average_price_short - self.price_ask)  # buy_num_coins is positive
-                self.wallet_balance += realized_pnl
-                self.reward_realized_pnl_short = realized_pnl
-
-        # similar to "SELL" button
-        if action == 2: # close/reduce long position by self.order_size
-            if self.coins_long > 0:
-                sell_num_coins = min(self.coins_long, self.order_size / self.price_ask)
-                self.initial_margin_long *= (max((self.coins_long - sell_num_coins), 0.) / self.coins_long)
-                self.coins_long = max(self.coins_long - sell_num_coins, 0) # cannot be negative
-                realized_pnl = sell_num_coins * (self.price_bid - self.average_price_long)
-                self.wallet_balance += realized_pnl
-                self.reward_realized_pnl_long = realized_pnl
-
-            if -self.coins_short >= 0: # open/increase short position by self.order_size
-                if (self.available_balance > self.order_size):
-                    sell_num_coins = self.order_size / self.price_ask
-                    self.average_price_short = (self.position_value_short + sell_num_coins * self.price_bid) / (-self.coins_short + sell_num_coins)
-                    self.initial_margin_short += sell_num_coins * self.price_ask / self.leverage
-                    self.coins_short -= sell_num_coins
-
-        self.liquidation = -self.unrealized_pnl_long - self.unrealized_pnl_short > self.margin_long + self.margin_short
-        self.episode_maxstep_achieved = self.time_relative == self.max_step
-
-        # CLOSE entire position or LIQUIDATION
-        if action == 3 or self.liquidation or self.episode_maxstep_achieved:
-            # close LONG position
-            if self.coins_long > 0:
-                sell_num_coins = self.coins_long   
-                # becomes zero
-                self.initial_margin_long *= max((self.coins_long - sell_num_coins), 0.) / self.coins_long 
-                # becomes zero
-                self.coins_long = max(self.coins_long - sell_num_coins, 0)
-                realized_pnl = sell_num_coins * (self.price_bid - self.average_price_long)
-                self.wallet_balance += realized_pnl
-                self.reward_realized_pnl_long = realized_pnl
-
-            # close SHORT position
-            if -self.coins_short > 0:
-                buy_num_coins = -self.coins_short
-                # becomes zero
-                self.initial_margin_short *= min((self.coins_short + buy_num_coins), 0.) / self.coins_short
-                # becomes zero
-                self.coins_short += buy_num_coins
-                realized_pnl = buy_num_coins * (self.average_price_short - self.price_ask) # buy_num_coins is positive
-                self.wallet_balance += realized_pnl
-                self.reward_realized_pnl_short = realized_pnl
+            
+        if action == 1: # CLOSE & OPEN LONG
+            self._close_position()
+            if self.available_balance > 0:
+                self._open_long()
+                
+        if action == 2: # CLOSE & OPEN SHORT
+            self._close_position()
+            if self.available_balance > 0:
+                self._open_short()
+                
+        if action == 3: # CLOSE POSITION
+            self._close_position()
+                
 
         self.margin_short, self.margin_long = self._calculate_margin_isolated()
         self.available_balance = max(self.wallet_balance - self.margin_short - self.margin_long, 0)
@@ -374,6 +392,39 @@ class LearningCryptoEnv(gym.Env):
         self.margin_long = self.initial_margin_long + self.maintenance_margin_percentage * self.position_value_long + self.fee_to_close_long
 
         return self.margin_short, self.margin_long
+
+
+    def _close_position(self):
+        # close LONG position
+        if self.coins_long > 0:
+            realized = self.coins_long * (self.price_bid - self.average_price_long)
+            self.wallet_balance += realized
+            self.reward_realized_pnl_long = realized
+            
+        # close SHORT position
+        if -self.coins_short > 0:
+            realized = (-self.coins_short) * (self.average_price_short - self.price_ask)
+            self.wallet_balance += realized
+            self.reward_realized_pnl_short = realized
+            
+        self.coins_long  = 0
+        self.coins_short = 0
+        self.initial_margin_long  = 0
+        self.initial_margin_short = 0
+
+    def _open_long(self):
+        coins = self.available_balance / self.price_ask
+        self.coins_long          = coins
+        self.average_price_long  = self.price_ask
+        self.initial_margin_long = self.available_balance / self.leverage
+        self.available_balance    = 0
+
+    def _open_short(self):
+        coins = self.available_balance / self.price_bid
+        self.coins_short         = -coins
+        self.average_price_short = self.price_bid
+        self.initial_margin_short = self.available_balance / self.leverage
+        self.available_balance    = 0
 
 
 if __name__ == "__main__":

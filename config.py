@@ -29,7 +29,7 @@ ppo_config = (
         env='CryptoEnv',
         env_config={
             "dataset_name": "dataset",  # .npy files should be in ./data/dataset/
-            "leverage": 2, # leverage for perpetual futures
+            "leverage": 1, # leverage for perpetual futures
             "episode_max_len": 168 * 2, # train episode length, 2 weeks
             "lookback_window_len": 168, 
             "train_start": [2000, 8000, 14000, 20000, 26000, 32000, 38000],
@@ -58,7 +58,7 @@ ppo_config = (
         lr=1e-4,
         gamma=0.995, # 1.
         grad_clip=2,
-        entropy_coeff=0.0002,
+        entropy_coeff=0.0003,
         kl_coeff=0,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
