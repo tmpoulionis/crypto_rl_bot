@@ -86,8 +86,8 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         transformer_out = self.transformer(x)
         last_out = transformer_out[:, -1, :]
         combined = torch.cat((last_out, dynamic_features), dim=1)
-    
         logits = self.policy_head(combined)
+        
         self.values_out = self.value_head(combined).squeeze(1)
     
         return logits, state

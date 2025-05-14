@@ -58,7 +58,7 @@ ppo_config = (
         lr=1e-4,
         gamma=0.995, # 1.
         grad_clip=2,
-        entropy_coeff=0.0003,
+        entropy_coeff=0.001,
         kl_coeff=0,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
@@ -66,6 +66,7 @@ ppo_config = (
         # lambda=0.95,
         clip_param=0.2, # larger values for more policy change
         vf_clip_param=1,
+        vf_loss_coeff=0.25, # 
         train_batch_size=8 * 6 * 168* 2, # num_rollout_workers * num_envs_per_worker * rollout_fragment_length * multiplier
         shuffle_sequences=True,
         model={

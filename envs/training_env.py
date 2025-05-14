@@ -300,11 +300,12 @@ class LearningCryptoEnv(gym.Env):
             self._close_position()
             if self.available_balance > 0:
                 self._open_short()
-                
+            
+        self.episode_maxstep_achieved = self.time_relative == self.max_step
+        
         if action == 3: # CLOSE POSITION
             self._close_position()
                 
-
         self.margin_short, self.margin_long = self._calculate_margin_isolated()
         self.available_balance = max(self.wallet_balance - self.margin_short - self.margin_long, 0)
         self.unrealized_pnl_short = (-self.coins_short * (self.average_price_short - self.price_ask))  # self.coins_short is negatve
@@ -322,6 +323,7 @@ class LearningCryptoEnv(gym.Env):
         equity_delta    = next_equity - self.equity
         unrealised_delta = equity_delta - realized     # remove realised part
         reward = ((1 - self.reward_coeff) * realized + self.reward_coeff * unrealised_delta) / self.initial_balance
+        reward = reward * 100
         
         self.equity = next_equity
 
