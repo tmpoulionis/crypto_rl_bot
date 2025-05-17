@@ -26,18 +26,26 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         # -------------- CNN Front-end --------------------
         if self.cnn_enabled:
             self.cnn = nn.Sequential(
-                nn.Conv1D(self.input_dim, 64, kernel_size=3, padding=1),
+                nn.Conv1d(self.input_dim, 64, kernel_size=3, padding=1),
                 nn.GELU(),
-                nn.Conv1D(64, 64, kernel_size=3, padding=1),
+                nn.Conv1d(64, 64, kernel_size=3, padding=2, dilation=2),
                 nn.GELU(),
-                nn.Conv1D(64, self.embed_size, kernel_size=1, padding=1)
+                nn.Conv1d(64, 64, kernel_size=3, padding=4, dilation=4),
+                nn.GELU(),
+                nn.Conv1d(64, self.embed_size, kernel_size=1, padding=1)
             )
+            # load pre-trained parameters
+            self.cnn.load_state_dict(torch.load("cnn_pretrain.pt", weights_only=True))
+
+            # freeze parameters
             if self.freeze_cnn:
+                self.cnn.eval()
                 for p in self.cnn.parameters():
                     p.requires_grad = False
         else:
             self.cnn = None 
-                   
+        
+        self.projection = nn.Linear(2*self.embed_size, self.embed_size)
         # -------------- Input layer -----------------------
         self.input_embed = nn.Linear(self.input_dim, self.embed_size)
         
@@ -79,7 +87,14 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         x = input_dict["obs"].view(-1, self.seq_len, self.input_dim).to(self.device)
         dynamic_features = x[:, -1, 2:4].clone()
     
+        if self.cnn_enabled:
+            feat_maps = self.cnn(x)
+    
         x = self.input_embed(x)
+        if self.cnn_enabled:
+            concat = torch.cat((x, feat_maps), 2) # concatenate cnn output + input embedding (2*embed_size)
+            x = self.projection(concat) # projection back to embed_size
+            
         position = torch.arange(0, self.seq_len, device=self.device).unsqueeze(0).expand(x.size(0), -1)
         x = x + self.pos_encoding(position)
     
