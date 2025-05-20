@@ -34,21 +34,24 @@ class SimpleTransformer(TorchModelV2, nn.Module):
                 nn.GELU(),
                 nn.Conv1d(64, self.embed_size, kernel_size=1, padding=1)
             )
+            
             # load pre-trained parameters
-            self.cnn.load_state_dict(torch.load("cnn_pretrain.pt", weights_only=True))
-
+            state = torch.load("cnn_pretrain.pt", map_location="cpu")
+            # strip the “cnn.” prefix:
+            state = { k.replace("cnn.", ""): v for k,v in state.items() }
+            self.cnn.load_state_dict(state, strict=True)
+            
             # freeze parameters
             if self.freeze_cnn:
-                self.cnn.eval()
                 for p in self.cnn.parameters():
                     p.requires_grad = False
         else:
             self.cnn = None 
-        
-        self.projection = nn.Linear(2*self.embed_size, self.embed_size)
+            
         # -------------- Input layer -----------------------
         self.input_embed = nn.Linear(self.input_dim, self.embed_size)
-        
+        # 1-1 projection (if cnn is used)
+        self.projection = nn.Linear(2*self.embed_size, self.embed_size)
         # Positional encoding
         self.pos_encoding = nn.Embedding(self.seq_len, self.embed_size)
         
