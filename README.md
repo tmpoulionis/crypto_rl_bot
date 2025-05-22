@@ -78,3 +78,6 @@ This Jupyter Notebook serves as the main entry point for data preparation, execu
 1. Run the `binance_scraper.py` to retrieve historical data from Binance.
 2. Load the retrieved CSV files, process the DataFrames and merge them to the final `dataset.csv` file.
 3. After merging, you can use this notebook to mess with the data and visualize it to your likings.
+
+
+# README will be updated :)
