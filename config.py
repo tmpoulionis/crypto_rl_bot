@@ -52,13 +52,13 @@ ppo_config = (
             shape=(76 * 168,),
             dtype=np.float32
         ),
-        action_space=gym.spaces.Discrete(4),
+        action_space=gym.spaces.Discrete(3),
     )
     .training(
         lr=1e-4,
         gamma=0.995, # 1.
         grad_clip=2,
-        entropy_coeff=0.001,
+        entropy_coeff=1e-4,
         kl_coeff=0,
         kl_target=0.01, # not used if kl_coeff == 0.
         num_sgd_iter=10,
@@ -77,7 +77,7 @@ ppo_config = (
                 "nlayers": 3,
                 "seq_len": 168,
                 "dropout": 0.1,
-                "cnn_enabled": False,
+                "cnn_enabled": True,
                 "freeze_cnn": False,
             }
         }

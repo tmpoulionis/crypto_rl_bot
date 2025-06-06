@@ -206,7 +206,7 @@ class LearningCryptoEnv(gym.Env):
         return scaled_obs_reset, {}
 
     def step(self, action: int):
-        assert action in [0, 1, 2, 3], action
+        assert action in [0, 1, 2], action
         ## prevent random actions with not initialized LSTM hidden state, applied if "use_lstm" in PPO config
         # if self.time_relative < self.cold_start_steps:
         #     action = 0
@@ -300,12 +300,12 @@ class LearningCryptoEnv(gym.Env):
             self._close_position()
             if self.available_balance > 0:
                 self._open_short()
-            
+        
+        # if action == 3: # CLOSE POSITION
+        #     self._close_position()
+        
         self.episode_maxstep_achieved = self.time_relative == self.max_step
         
-        if action == 3: # CLOSE POSITION
-            self._close_position()
-                
         self.margin_short, self.margin_long = self._calculate_margin_isolated()
         self.available_balance = max(self.wallet_balance - self.margin_short - self.margin_long, 0)
         self.unrealized_pnl_short = (-self.coins_short * (self.average_price_short - self.price_ask))  # self.coins_short is negatve

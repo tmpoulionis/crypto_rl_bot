@@ -25,26 +25,44 @@ class SimpleTransformer(TorchModelV2, nn.Module):
 
         # -------------- CNN Front-end --------------------
         if self.cnn_enabled:
-            self.cnn = nn.Sequential(
-                nn.Conv1d(self.input_dim, 64, kernel_size=3, padding=1),
+            self.hourly_cnn = nn.Sequential(
+                nn.Conv1d(36, 64, kernel_size=3, padding=1),
                 nn.GELU(),
                 nn.Conv1d(64, 64, kernel_size=3, padding=2, dilation=2),
                 nn.GELU(),
                 nn.Conv1d(64, 64, kernel_size=3, padding=4, dilation=4),
                 nn.GELU(),
-                nn.Conv1d(64, self.embed_size, kernel_size=1, padding=1)
+                nn.Conv1d(64, self.embed_size, kernel_size=1)
             )
             
-            # load pre-trained parameters
-            state = torch.load("cnn_pretrain.pt", map_location="cpu")
-            # strip the “cnn.” prefix:
-            state = { k.replace("cnn.", ""): v for k,v in state.items() }
-            self.cnn.load_state_dict(state, strict=True)
+            # self.daily_cnn = nn.Sequential(
+            #     nn.Conv1d(self.input_dim, 64, kernel_size=3, padding=1),
+            #     nn.GELU(),
+            #     nn.Conv1d(64, 64, kernel_size=3, padding=2, dilation=2),
+            #     nn.GELU(),
+            #     nn.Conv1d(64, 64, kernel_size=3, padding=4, dilation=4),
+            #     nn.GELU(),
+            #     nn.Conv1d(64, self.embed_size, kernel_size=1, padding=1)
+            # )
+            
+            # # load pre-trained parameters
+            # map_loc = "cuda" if torch.cuda.is_available() else "cpu"
+            # hourly_state = torch.load("hourly_cnn_pretrain.pt", map_location=map_loc)
+            # # daily_state = torch.load("daily_cnn_pretrain.pt")
+            
+            # # strip the “cnn.” prefix:
+            # hourly_state = { k.replace("cnn.", ""): v for k,v in hourly_state.items() }
+            # # daily_state = { k.replace("cnn.", ""): v for k,v in daily_state.items() }
+            
+            # self.hourly_cnn.load_state_dict(hourly_state, strict=True)
+            # self.daily_cnn.load_state_dict(daily_state, strict=True)
             
             # freeze parameters
             if self.freeze_cnn:
-                for p in self.cnn.parameters():
+                for p in self.hourly_cnn.parameters():
                     p.requires_grad = False
+                # for p in self.daily_cnn.parameters():
+                #     p.requires_grad = False
         else:
             self.cnn = None 
             
@@ -84,6 +102,27 @@ class SimpleTransformer(TorchModelV2, nn.Module):
             nn.Linear(256, 1)
         )
 
+    def split_hourly_daily(self, window: torch.Tensor):
+        
+        # Indices for hourly and daily features
+        hourly_idx = [ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
+        # daily_idx = [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+        # 39, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75]
+
+        # Extract hourly and daily data
+        hourly_data = window[:, :, hourly_idx]
+        # daily_data_full = window[:, :, daily_idx]
+
+        # For daily data, select rows where hour == 0 (start of each day)
+        # N, T, D = daily_data_full.shape
+        # days = T//24
+
+        # daily_data_reshaped = daily_data_full.reshape(N, days, 24, D)
+        # daily_data = daily_data_reshaped[:, :, 0, :]
+
+        return hourly_data #daily_data
+    
     @override(ModelV2)
     def forward(self, input_dict, state, seq_lens):
         self.device = input_dict["obs"].device
@@ -91,11 +130,13 @@ class SimpleTransformer(TorchModelV2, nn.Module):
         dynamic_features = x[:, -1, 2:4].clone()
     
         if self.cnn_enabled:
-            feat_maps = self.cnn(x)
+            hourly_data = self.split_hourly_daily(x).to(self.device)
+            hourly_feat_maps = self.hourly_cnn(hourly_data.permute(0, 2, 1))  # (N, embed_size, seq_len)
     
         x = self.input_embed(x)
         if self.cnn_enabled:
-            concat = torch.cat((x, feat_maps), 2) # concatenate cnn output + input embedding (2*embed_size)
+            concat = torch.cat((hourly_feat_maps.permute(0, 2, 1), x), dim=2) # (N, seq_len, 2*embed_size)
+            
             x = self.projection(concat) # projection back to embed_size
             
         position = torch.arange(0, self.seq_len, device=self.device).unsqueeze(0).expand(x.size(0), -1)

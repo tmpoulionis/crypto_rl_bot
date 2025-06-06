@@ -12,7 +12,7 @@ class GymSpaceBuilderHedge:
         self.observation_dim = observation_dim
         
         self.action_space = spaces.Tuple(
-            [spaces.Discrete(4), spaces.Discrete(4)]
+            [spaces.Discrete(3), spaces.Discrete(3)]
         )
         
         self.observation_space = spaces.Box(
@@ -29,7 +29,7 @@ class GymSpaceBuilderOneWay:
     def __init__(self, observation_dim: int = 168 * 241) -> None:
 
         self.observation_dim = observation_dim
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(3)
         
         self.observation_space = spaces.Box(
                 low=-np.inf,
@@ -61,7 +61,7 @@ class GymSpaceBuilderShort:
     def __init__(self, observation_dim: int = 567) -> None:
         self.observation_dim = observation_dim
 
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(3)
         
         self.observation_space = spaces.Box(
                 low=-np.inf,
